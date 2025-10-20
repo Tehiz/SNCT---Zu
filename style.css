@@ -7,7 +7,6 @@
 
 body {
     font-family: 'Montserrat', sans-serif;
-    /* Fundo gradiente com tema oceânico */
     background: linear-gradient(135deg, #005aa7, #0d324d);
     color: #333;
     display: flex;
@@ -52,7 +51,6 @@ hr {
 /* --- Layout dos Inputs (Responsivo) --- */
 .input-grid {
     display: grid;
-    /* Cria 2 colunas em telas maiores */
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
 }
@@ -61,6 +59,12 @@ hr {
 .input-group-full {
     text-align: left;
 }
+
+/* MODIFICADO: input-group-full agora ocupa as 2 colunas */
+.input-grid .input-group-full {
+    grid-column: 1 / -1; 
+}
+
 
 /* --- Estilo dos Inputs e Labels --- */
 label {
@@ -90,7 +94,7 @@ input[type="number"]:focus {
 button {
     width: 100%;
     padding: 1rem;
-    background: #0077cc; /* Azul vibrante */
+    background: #0077cc;
     color: white;
     border: none;
     border-radius: 8px;
@@ -102,168 +106,130 @@ button {
 }
 
 button:hover {
-    background: #005aa7; /* Tom mais escuro */
+    background: #005aa7;
 }
 
-/* --- Área de Resultado --- */
+/* ---------------------------------
+   NOVAS REGRAS: VISUALIZADOR DE CENA
+   ---------------------------------
+*/
+
 #result-container {
     margin-top: 2rem;
     padding: 1.5rem;
     background: #f4f8ff;
     border-radius: 8px;
     border: 1px dashed #005aa7;
-    /* MODIFICADO: Padding superior maior para o visualizador */
-    padding-top: 2rem;
 }
 
-#result-container h2 {
-    color: #0d324d;
-    /* MODIFICADO: Espaço após o visualizador */
-    margin-top: 1rem;
-    margin-bottom: 0.5rem;
+/* A "CENA" principal */
+#simulation-scene {
+    display: flex;
+    justify-content: space-between; /* Onda na esquerda, prédio na direita */
+    align-items: flex-end; /* Alinha ambos na "base" */
+    height: 300px; /* Altura máxima da visualização */
+    background: #e0f7fa; /* Fundo de "céu" */
+    border-bottom: 5px solid #8B4513; /* Chão marrom */
+    padding: 0 10%; /* Espaçamento das bordas */
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden; /* Garante que nada saia da cena */
 }
 
-#result-text {
+/* A ONDA (TSUNAMI) */
+#tsunami-wave {
+    width: 45%;
+    background: linear-gradient(to top, #005aa7, #00aaff);
+    height: 0; /* Começa com 0, JS vai definir a altura */
+    position: relative;
+    transition: height 0.7s ease-out;
+
+    /* A forma da "crista" da onda movendo para a direita */
+    border-top-left-radius: 100% 80px; 
+    border-top-right-radius: 100% 20px; 
+}
+
+/* O PRÉDIO */
+#building {
+    width: 30%;
+    background: #6c757d; /* Cinza escuro */
+    border: 3px solid #343a40;
+    height: 0; /* Começa com 0, JS vai definir a altura */
+    position: relative;
+    transition: height 0.7s ease-out;
+    
+    /* Janelas (detalhe visual) */
+    background-image: linear-gradient(rgba(255, 255, 255, 0.4) 2px, transparent 2px),
+                      linear-gradient(90deg, rgba(255, 255, 255, 0.4) 2px, transparent 2px);
+    background-size: 20px 20px;
+}
+
+/* LABELS DE ALTURA (para a onda e o prédio) */
+#wave-label, #building-label {
+    position: absolute;
+    top: -25px; /* Fica acima do elemento */
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.8);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #000;
+    white-space: nowrap;
+}
+
+/* TEXTO DE RESULTADO (PERIGO / SEGURO) */
+#comparison-result-text {
     font-size: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    /* A cor será definida via JS (vermelho ou verde) */
+}
+
+/* TEXTO DO CÁLCULO NUMÉRICO */
+#result-text-title {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 0.25rem;
+}
+#result-text {
+    font-size: 1.2rem;
     font-weight: 600;
     color: #333;
 }
-
 #result-text span {
-    color: #0077cc; /* Destaca o número */
-    font-size: 2rem;
+    color: #0077cc;
+    font-size: 1.5rem;
 }
+
 
 /* Classe para esconder/mostrar o resultado */
 .hidden {
     display: none;
 }
 
-/* ---------------------------------
-   NOVAS REGRAS: VISUALIZADOR DE ONDA
-   ---------------------------------
-*/
-
-#visualizer-container {
-    width: 80%; /* Mais estreito que o container principal */
-    margin: 1rem auto;
-    padding: 1rem;
-    padding-bottom: 3rem; /* Espaço para o label do vale */
-    position: relative;
-}
-
-#wave-bar {
-    width: 20px; /* Largura da "barra" da onda */
-    height: 250px; /* Altura fixa para a visualização */
-    background: linear-gradient(to bottom, #a0c4ff, #e0f7fa, #a0c4ff); /* Gradiente suave */
-    border-radius: 10px;
-    border: 2px solid #0d324d;
-    margin: 0 auto; /* Centralizar a barra */
-    position: relative; /* Contexto de posição para os marcadores */
-}
-
-.wave-marker {
-    position: absolute;
-    left: 50%; /* Centraliza o marcador na barra */
-    width: 100px; /* Largura para o texto */
-    transform: translateX(-50%);
-    text-align: left;
-    font-size: 0.85rem;
-    font-weight: 600;
-}
-
-.wave-marker span {
-    display: block;
-    position: absolute;
-    left: 45px; /* Posição do texto */
-    white-space: nowrap;
-}
-
-/* Linha horizontal para o marcador */
-.wave-marker::before {
-    content: '';
-    position: absolute;
-    left: -35px; /* Começa à esquerda da barra */
-    width: 30px; /* Comprimento da linha */
-    height: 2px;
-    background: currentColor;
-}
-
-/* Marcadores de Limite (Pico, Centro, Vale) */
-.peak {
-    color: #1a73e8; /* Azul */
-    bottom: 100%; /* Topo da barra */
-}
-
-.center {
-    color: #888; /* Cinza */
-    bottom: 50%; /* Meio da barra */
-}
-
-.trough {
-    color: #d93025; /* Vermelho */
-    bottom: 0%; /* Base da barra */
-}
-
-/* Marcador do Resultado F(x) */
-.result-point {
-    color: #0077cc; /* Azul do botão */
-    font-weight: 700;
-    font-size: 1rem;
-    bottom: 50%; /* Posição padrão, será atualizada via JS */
-    z-index: 10;
-    transition: bottom 0.5s ease-out; /* Animação suave */
-}
-
-.result-point span {
-     left: 50px;
-}
-
-/* Seta/Ponto especial para o resultado */
-.result-point::before {
-    background: #0077cc;
-    height: 3px;
-    width: 35px;
-    left: -40px;
-    /* Simula uma seta */
-    clip-path: polygon(0% 0%, 75% 0%, 100% 50%, 75% 100%, 0% 100%);
-}
-
-
 /* --- Responsividade para Celulares --- */
 @media (max-width: 600px) {
     body {
         padding: 1rem;
     }
-
     .wave-container {
         padding: 1.5rem;
     }
-
-    /* Em telas pequenas, os inputs ficam em 1 coluna */
     .input-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr; /* 1 coluna */
         gap: 1rem;
     }
-
     h1 {
         font-size: 1.8rem;
     }
-
-    /* NOVAS REGRAS: Responsividade do Visualizador */
-    #visualizer-container {
-        width: 100%;
-        padding-bottom: 2.5rem;
+    #simulation-scene {
+        height: 250px; /* Cena um pouco menor */
+        padding: 0 5%;
     }
-
-    #wave-bar {
-        height: 200px; /* Um pouco menor em telas pequenas */
+    #comparison-result-text {
+        font-size: 1.2rem;
     }
-
-     .wave-marker span {
-        left: 40px;
-     }
-     .result-point span {
-        left: 45px;
-     }
 }
