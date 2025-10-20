@@ -4,13 +4,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Seleciona os elementos do HTML que vamos usar
     const waveForm = document.getElementById('wave-form');
     const resultContainer = document.getElementById('result-container');
-    const resultText = document.getElementById('result-text');
 
-    // NOVOS: Seleciona os elementos do visualizador
-    const markerPeak = document.getElementById('marker-peak');
-    const markerCenter = document.getElementById('marker-center');
-    const markerTrough = document.getElementById('marker-trough');
-    const markerResult = document.getElementById('marker-result');
+    // --- NOVOS ELEMENTOS DA CENA ---
+    const buildingHeightInput = document.getElementById('building-height');
+    const tsunamiWaveEl = document.getElementById('tsunami-wave');
+    const buildingEl = document.getElementById('building');
+    
+    const waveLabel = document.getElementById('wave-label');
+    const buildingLabel = document.getElementById('building-label');
+    
+    const comparisonResultText = document.getElementById('comparison-result-text');
+    const resultText = document.getElementById('result-text');
+    // --- FIM DOS NOVOS ELEMENTOS ---
 
 
     // Adiciona um "ouvinte" para o evento de 'submit' (clique no botão)
@@ -19,77 +24,68 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
 
         // 1. Obter os valores dos inputs
-        // Usamos parseFloat para converter o texto do input em números decimais
         const a = parseFloat(document.getElementById('a').value);
         const b = parseFloat(document.getElementById('b').value);
         const t = parseFloat(document.getElementById('t').value);
         const d = parseFloat(document.getElementById('d').value);
         const x = parseFloat(document.getElementById('x').value);
+        const buildingHeight = parseFloat(buildingHeightInput.value);
 
         // 2. Validar se todos os campos são números
-        if (isNaN(a) || isNaN(b) || isNaN(t) || isNaN(d) || isNaN(x)) {
+        if (isNaN(a) || isNaN(b) || isNaN(t) || isNaN(d) || isNaN(x) || isNaN(buildingHeight)) {
             alert("Por favor, preencha todos os campos com números válidos.");
             return;
         }
 
         // 3. Executar o Cálculo
         // F(x) = a * sen(b*x - t) + d
-        // Math.sin() em JavaScript calcula o seno em RADIANOS.
-        // A "Frequência Angular" (b) já costuma estar preparada para isso.
-        
-        const interiorDoSen = (b * x) - t;
-        const fx = a * Math.sin(interiorDoSen) + d;
+        const fx = a * Math.sin(b * x - t) + d;
 
-        // 4. Exibir o Resultado (Texto)
+        // --- 4. ATUALIZAR A VISUALIZAÇÃO ---
+
+        // Para a simulação, consideramos que a "altura" do tsunami é o valor F(x).
+        // Se F(x) for negativo (um vale), tratamos como altura 0 para a colisão.
+        const tsunamiHeight = Math.max(0, fx);
+
+        // Altura máxima da nossa "cena" em pixels
+        const scenePixelHeight = 300; 
+
+        // Encontrar o maior valor (prédio ou onda) para escalar a visualização
+        // Adicionamos 1 para evitar divisão por zero
+        const maxValue = Math.max(buildingHeight, tsunamiHeight, 1);
+
+        // Calcular a altura em pixels para cada elemento
+        // (Valor / Valor Máximo) * Altura Total da Cena
+        const buildingPixelHeight = (buildingHeight / maxValue) * scenePixelHeight;
+        const tsunamiPixelHeight = (tsunamiHeight / maxValue) * scenePixelHeight;
+
+        // Aplicar as alturas calculadas ao CSS
+        buildingEl.style.height = `${buildingPixelHeight}px`;
+        tsunamiWaveEl.style.height = `${tsunamiPixelHeight}px`;
+
+        // Atualizar os rótulos de altura
+        buildingLabel.textContent = `Prédio: ${buildingHeight.toFixed(1)}m`;
+        waveLabel.textContent = `Tsunami: ${tsunamiHeight.toFixed(1)}m`;
+
+        // --- 5. EXIBIR O RESULTADO (TEXTO) ---
+
+        // Atualizar o texto de comparação (Perigo / Seguro)
+        if (tsunamiHeight > buildingHeight) {
+            comparisonResultText.textContent = "PERIGO! O Tsunami é mais alto que o prédio!";
+            comparisonResultText.style.color = "#d93025"; // Vermelho
+        } else if (tsunamiHeight > 0) {
+            comparisonResultText.textContent = "SEGURO. O prédio é mais alto que a onda.";
+            comparisonResultText.style.color = "#1e8e3e"; // Verde
+        } else {
+            comparisonResultText.textContent = "Nenhum tsunami (F(x) ≤ 0).";
+            comparisonResultText.style.color = "#555"; // Cinza
+        }
         
-        // Formata o resultado para ter no máximo 4 casas decimais
+        // Atualizar o texto do cálculo exato
         const resultadoFormatado = fx.toFixed(4); 
-
-        // Atualiza o texto e remove a classe 'hidden' para mostrar
         resultText.innerHTML = `F(${x}) = <span>${resultadoFormatado}</span>`;
         
-
-        // 5. ATUALIZAR O VISUALIZADOR (NOVA SEÇÃO)
-        
-        // Usamos Math.abs(a) para garantir que o pico esteja sempre acima do vale,
-        // mesmo se o usuário digitar uma amplitude negativa.
-        const amplitudeAbsoluta = Math.abs(a);
-
-        if (amplitudeAbsoluta === 0) {
-            // Caso especial: Onda "plana" (amplitude zero)
-            markerPeak.querySelector('span').textContent = `Pico: ${d.toFixed(2)}`;
-            markerCenter.querySelector('span').textContent = `Centro: ${d.toFixed(2)}`;
-            markerTrough.querySelector('span').textContent = `Vale: ${d.toFixed(2)}`;
-            
-            // Todos os pontos ficam no meio (50%)
-            markerResult.style.bottom = '50%';
-            
-        } else {
-            // Lógica para onda normal
-            const peak = d + amplitudeAbsoluta;
-            const trough = d - amplitudeAbsoluta;
-            const center = d;
-            const totalHeight = 2 * amplitudeAbsoluta; // Distância total do vale ao pico
-
-            // Atualiza os textos dos marcadores
-            markerPeak.querySelector('span').textContent = `Pico: ${peak.toFixed(2)}`;
-            markerCenter.querySelector('span').textContent = `Centro: ${center.toFixed(2)}`;
-            markerTrough.querySelector('span').textContent = `Vale: ${trough.toFixed(2)}`;
-
-            // Calcula a posição percentual do resultado F(x)
-            // (Posição relativa / Altura Total) * 100
-            const relativePos = fx - trough;
-            let percentage = (relativePos / totalHeight) * 100;
-            
-            // Limita a porcentagem entre 0% e 100% (segurança)
-            percentage = Math.max(0, Math.min(100, percentage));
-
-            // Atualiza a posição vertical do marcador F(x)
-            markerResult.style.bottom = `${percentage}%`;
-        }
-
         // 6. MOSTRAR O CONTAINER DE RESULTADO
         resultContainer.classList.remove('hidden');
     });
-
 });
