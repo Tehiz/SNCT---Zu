@@ -1,46 +1,178 @@
-// Espera o conteúdo da página carregar antes de executar o script
-document.addEventListener('DOMContentLoaded', () => {
+/* --- Configurações Globais e de Fundo --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-    // Seleciona os elementos do HTML que vamos usar
-    const waveForm = document.getElementById('wave-form');
-    const resultContainer = document.getElementById('result-container');
-    const resultText = document.getElementById('result-text');
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: linear-gradient(135deg, #005aa7, #0d324d);
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 1.5rem;
+}
 
-    // Adiciona um "ouvinte" para o evento de 'submit' (clique no botão)
-    waveForm.addEventListener('submit', (event) => {
-        // Impede que o formulário recarregue a página
-        event.preventDefault();
+/* --- Container Principal da Calculadora --- */
+.wave-container {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    padding: 2.5rem;
+    max-width: 700px; /* Aumentei um pouco para o gráfico */
+    width: 100%;
+    text-align: center;
+}
 
-        // 1. Obter os valores dos inputs
-        // Usamos parseFloat para converter o texto do input em números decimais
-        const a = parseFloat(document.getElementById('a').value);
-        const b = parseFloat(document.getElementById('b').value);
-        const t = parseFloat(document.getElementById('t').value);
-        const d = parseFloat(document.getElementById('d').value);
-        const x = parseFloat(document.getElementById('x').value);
+/* --- Títulos e Textos --- */
+h1 {
+    color: #0d324d;
+    margin-bottom: 0.5rem;
+}
 
-        // 2. Validar se todos os campos são números
-        if (isNaN(a) || isNaN(b) || isNaN(t) || isNaN(d) || isNaN(x)) {
-            alert("Por favor, preencha todos os campos com números válidos.");
-            return;
-        }
+.formula {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 1.25rem;
+    font-style: italic;
+    color: #555;
+    margin-bottom: 2rem;
+}
 
-        // 3. Executar o Cálculo
-        // F(x) = a * sen(b*x - t) + d
-        // Math.sin() em JavaScript calcula o seno em RADIANOS.
-        // A "Frequência Angular" (b) já costuma estar preparada para isso.
-        
-        const interiorDoSen = (b * x) - t;
-        const fx = a * Math.sin(interiorDoSen) + d;
+hr {
+    border: 0;
+    height: 1px;
+    background: #e0e0e0;
+    margin: 1.5rem 0;
+}
 
-        // 4. Exibir o Resultado
-        
-        // Formata o resultado para ter no máximo 4 casas decimais
-        const resultadoFormatado = fx.toFixed(4); 
+/* --- Layout dos Inputs (Responsivo) --- */
+.input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
 
-        // Atualiza o texto e remove a classe 'hidden' para mostrar
-        resultText.innerHTML = `F(${x}) = <span>${resultadoFormatado}</span>`;
-        resultContainer.classList.remove('hidden');
-    });
+.input-group,
+.input-group-full {
+    text-align: left;
+}
 
-});
+/* --- Estilo dos Inputs e Labels --- */
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #005aa7;
+}
+
+input[type="number"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: 'Montserrat', sans-serif;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input[type="number"]:focus {
+    outline: none;
+    border-color: #005aa7;
+    box-shadow: 0 0 5px rgba(0, 90, 167, 0.5);
+}
+
+/* --- Botão de Calcular --- */
+button {
+    width: 100%;
+    padding: 1rem;
+    background: #0077cc;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background: #005aa7;
+}
+
+/* --- Área de Resultado --- */
+#result-container {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #f4f8ff;
+    border-radius: 8px;
+    border: 1px dashed #005aa7;
+}
+
+#result-container h2 {
+    color: #0d324d;
+    margin-bottom: 0.5rem;
+}
+
+#result-text {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+#result-text span {
+    color: #0077cc;
+    font-size: 2rem;
+}
+
+/* --- Seção do Gráfico --- */
+#chart-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+#chart-section h2 {
+    color: #0d324d;
+    margin-bottom: 1.5rem;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    /* Altura para manter a proporção do gráfico */
+    height: 350px; 
+}
+
+
+/* Classe para esconder/mostrar o resultado */
+.hidden {
+    display: none;
+}
+
+/* --- Responsividade para Celulares --- */
+@media (max-width: 600px) {
+    body {
+        padding: 1rem;
+    }
+
+    .wave-container {
+        padding: 1.5rem;
+    }
+
+    .input-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    .chart-container {
+        height: 300px; /* Ajusta a altura em telas menores */
+    }
+}
