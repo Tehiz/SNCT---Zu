@@ -6,7 +6,6 @@
     <title>Calculadora de Altura de Onda</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -49,12 +48,35 @@
             <p id="result-text"></p>
         </div>
 
-        <div id="chart-section" class="hidden">
+        <div id="visual-section" class="hidden">
             <h2>Comparação Visual da Onda</h2>
-            <div class="chart-container">
-                <canvas id="waveComparisonChart"></canvas>
+            
+            <div class="comparison-scene">
+                
+                <div class="scale-ruler">
+                    <span>30 m</span>
+                    <span>20 m</span>
+                    <span>10 m</span>
+                    <span>0 m</span>
+                </div>
+
+                <div class="wave-level-container">
+                    <div id="calculated-wave">
+                        <span id="wave-label-text"></span>
+                    </div>
+                </div>
+
+                <div class="objects-lane">
+                    <div class="comparison-object" id="obj-person" title="Pessoa (1.8m)">Pessoa</div>
+                    <div class="comparison-object" id="obj-house" title="Casa 1 Andar (3.5m)">Casa</div>
+                    <div class="comparison-object" id="obj-post" title="Poste (6m)">Poste</div>
+                    <div class="comparison-object" id="obj-building" title="Prédio 10 Andares (30m)">Prédio</div>
+                </div>
+
             </div>
+            <p id="wave-warning" class="hidden"></p>
         </div>
+
     </div>
 
     <script src="script.js"></script>
