@@ -10,8 +10,8 @@
 <body>
 
     <div class="wave-container">
-        <h1>Calculadora de Onda</h1>
-        <p class="formula">F(x) = a · sen(b·x - t) + d</p>
+        <h1>Calculadora de Onda (Tsunami)</h1>
+        <p class="formula">Altura do Tsunami F(x) = a · sen(b·x - t) + d</p>
 
         <form id="wave-form">
             <div class="input-grid">
@@ -28,44 +28,44 @@
                     <input type="number" id="t" step="0.1" placeholder="Ex: 1.5" required>
                 </div>
                 <div class="input-group">
-                    <label for="d">d (Desloc. Vertical)</label>
+                    <label for="d">d (Nível do Mar)</label>
                     <input type="number" id="d" step="0.1" placeholder="Ex: 0" required>
                 </div>
             </div>
 
             <hr>
 
-            <div class="input-group-full">
-                <label for="x">x (Tempo ou Posição)</label>
-                <input type="number" id="x" step="0.1" placeholder="Insira o ponto que deseja calcular (Ex: 10)" required>
+            <div class="input-grid">
+                <div class="input-group-full">
+                    <label for="building-height">Altura do Prédio (para comparar)</label>
+                    <input type="number" id="building-height" step="1" placeholder="Ex: 20" required>
+                </div>
+                <div class="input-group-full">
+                    <label for="x">x (Distância/Tempo)</label>
+                    <input type="number" id="x" step="0.1" placeholder="Insira o ponto que deseja calcular (Ex: 10)" required>
+                </div>
             </div>
 
             <button type="submit">Calcular Altura F(x)</button>
         </form>
 
         <div id="result-container" class="hidden">
-
-            <div id="visualizer-container">
-                <div id="wave-bar">
-                    <div class="wave-marker peak" id="marker-peak">
-                        <span>Pico: 0</span>
-                    </div>
-                    <div class="wave-marker center" id="marker-center">
-                        <span>Centro: 0</span>
-                    </div>
-                    <div class="wave-marker trough" id="marker-trough">
-                        <span>Vale: 0</span>
-                    </div>
-                    
-                    <div class="wave-marker result-point" id="marker-result">
-                        <span>F(x)</span>
-                    </div>
+            
+            <div id="simulation-scene">
+                <div id="tsunami-wave">
+                    <span id="wave-label">Tsunami: 0m</span>
+                </div>
+                <div id="building">
+                    <span id="building-label">Prédio: 0m</span>
                 </div>
             </div>
-            <h2>Altura da Onda (Resultado)</h2>
+
+            <h2 id="comparison-result-text"></h2>
+            
+            <p id="result-text-title">Valor Exato Calculado:</p>
             <p id="result-text"></p>
         </div>
-    </div>
+        </div>
 
     <script src="script.js"></script>
 </body>
