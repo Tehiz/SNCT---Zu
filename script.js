@@ -1,27 +1,29 @@
-// Espera o conteúdo da página carregar antes de executar o script
 document.addEventListener('DOMContentLoaded', () => {
 
+    // Seletores do Formulário e Resultado
     const waveForm = document.getElementById('wave-form');
     const resultContainer = document.getElementById('result-container');
     const resultText = document.getElementById('result-text');
-    const chartSection = document.getElementById('chart-section'); // Nova seção do gráfico
-    const ctx = document.getElementById('waveComparisonChart').getContext('2d'); // Contexto do canvas para o Chart.js
 
-    let waveChart = null; // Variável para armazenar a instância do gráfico
+    // Seletores da Nova Visualização
+    const visualSection = document.getElementById('visual-section');
+    const comparisonScene = document.querySelector('.comparison-scene');
+    const calculatedWave = document.getElementById('calculated-wave');
+    const waveLabelText = document.getElementById('wave-label-text');
+    const waveWarning = document.getElementById('wave-warning');
 
-    // Dados de comparação em metros
-    const comparisonData = {
-        'Altura da Onda': 0, // Será atualizado com o cálculo
-        'Carro (SUV médio)': 1.7,
-        'Andar de prédio': 3,
-        'Casa (1 andar)': 3.5,
-        'Poste de Luz': 6,
-        'Caminhão Articulado': 4.5,
-        'Prédio baixo (3 andares)': 9,
-        'Edifício comercial (10 andares)': 30,
-        'Torre Eiffel (altura total)': 330,
-        'Monte Everest (pico)': 8848 // Exemplo extremo
-    };
+    // --- Configuração da Escala Visual ---
+    // A altura máxima da nossa régua (em metros)
+    const MAX_SCALE_METERS = 35; 
+    // A altura do container em pixels (definido no CSS)
+    // Usamos offsetHeight para obter o valor real renderizado
+    let SCENE_HEIGHT_PIXELS = 400; // Valor padrão
+    if (comparisonScene) {
+         SCENE_HEIGHT_PIXELS = comparisonScene.offsetHeight;
+    }
+    // Calcula quantos pixels por metro
+    const pixelsPerMeter = SCENE_HEIGHT_PIXELS / MAX_SCALE_METERS;
+    // --------------------------------------
 
     waveForm.addEventListener('submit', (event) => {
         event.preventDefault();
@@ -39,115 +41,38 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const interiorDoSen = (b * x) - t;
         const fx = a * Math.sin(interiorDoSen) + d;
+        const resultadoFormatado = fx.toFixed(2);
 
-        const resultadoFormatado = fx.toFixed(2); // Duas casas decimais para o gráfico
-
+        // 1. Exibir o Resultado Numérico
         resultText.innerHTML = `F(${x}) = <span>${resultadoFormatado} m</span>`;
         resultContainer.classList.remove('hidden');
 
-        // Atualiza a altura da onda calculada nos dados de comparação
-        comparisonData['Altura da Onda'] = parseFloat(resultadoFormatado);
+        // 2. Controlar a Visualização
+        let waveHeightInPixels = fx * pixelsPerMeter;
 
-        // -----------------------------------------------------------
-        // Lógica para o Gráfico
-        // -----------------------------------------------------------
+        // Limpa avisos anteriores
+        waveWarning.classList.add('hidden');
+        waveLabelText.textContent = `${resultadoFormatado} m`;
 
-        // Destrói o gráfico anterior se ele existir para evitar sobreposição
-        if (waveChart) {
-            waveChart.destroy();
+        // Se a onda for negativa (vale), mostramos como 0
+        if (waveHeightInPixels < 0) {
+            waveHeightInPixels = 0;
+            waveLabelText.textContent = `${resultadoFormatado} m (vale)`;
         }
 
-        // Prepara os dados e labels para o Chart.js
-        const labels = Object.keys(comparisonData);
-        const dataValues = Object.values(comparisonData);
+        // Se a onda for maior que nossa escala, ela transborda
+        if (waveHeightInPixels > SCENE_HEIGHT_PIXELS) {
+            waveHeightInPixels = SCENE_HEIGHT_PIXELS; // Trava no máximo
+            // Mostra o aviso
+            waveWarning.textContent = `AVISO: A onda de ${resultadoFormatado}m ultrapassou a escala visual de ${MAX_SCALE_METERS}m!`;
+            waveWarning.classList.remove('hidden');
+        }
+        
+        // 3. Aplicar a altura ao "nível da onda"
+        calculatedWave.style.height = waveHeightInPixels + 'px';
 
-        // Define as cores das barras
-        const backgroundColors = labels.map(label => 
-            label === 'Altura da Onda' ? '#0077cc' : '#aed6f1' // Cor para a onda, outra para comparações
-        );
-        const borderColors = labels.map(label => 
-            label === 'Altura da Onda' ? '#005aa7' : '#5dade2'
-        );
-
-        waveChart = new Chart(ctx, {
-            type: 'bar', // Tipo de gráfico: barras
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Altura em Metros',
-                    data: dataValues,
-                    backgroundColor: backgroundColors,
-                    borderColor: borderColors,
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false, // Permite que o gráfico se ajuste ao seu contêiner
-                indexAxis: 'y', // Faz um gráfico de barras horizontal
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Altura (metros)',
-                            color: '#333',
-                            font: {
-                                size: 14,
-                                weight: '600'
-                            }
-                        },
-                        ticks: {
-                            color: '#555'
-                        },
-                        grid: {
-                            color: '#eee'
-                        }
-                    },
-                    y: {
-                        ticks: {
-                            color: '#555'
-                        },
-                        grid: {
-                            color: '#eee'
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false // Não precisa de legenda para este tipo de comparação
-                    },
-                    title: {
-                        display: true,
-                        text: 'Comparação da Altura da Onda com Referências',
-                        color: '#0d324d',
-                        font: {
-                            size: 18,
-                            weight: '700'
-                        },
-                        padding: {
-                            top: 10,
-                            bottom: 20
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed.x !== null) {
-                                    label += context.parsed.x + ' m';
-                                }
-                                return label;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        chartSection.classList.remove('hidden'); // Mostra a seção do gráfico
+        // 4. Mostrar a seção visual
+        visualSection.classList.remove('hidden');
     });
+
 });
