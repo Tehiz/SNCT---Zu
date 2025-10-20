@@ -163,3 +163,294 @@
         }
 
         /* 1. A Régua de Altura */
+        .scale-ruler {
+            flex-shrink: 0;
+            width: 50px;
+            height: 100%;
+            position: relative;
+            border-right: 2px dashed #aaa;
+            font-size: 12px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .scale-ruler span {
+            position: absolute;
+            left: 5px;
+            width: 100%;
+        }
+        /* Nossa escala máxima é 35m, então 30m fica a 85.7% (30/35) */
+        .scale-ruler span:nth-of-type(1) { bottom: 85.7%; } /* 30m */
+        .scale-ruler span:nth-of-type(2) { bottom: 57.1%; } /* 20m */
+        .scale-ruler span:nth-of-type(3) { bottom: 28.5%; } /* 10m */
+        .scale-ruler span:nth-of-type(4) { bottom: 0; }     /* 0m */
+
+
+        /* 2. O Nível da Onda */
+        .wave-level-container {
+            flex-grow: 1; /* Ocupa o espaço central */
+            height: 100%;
+            position: relative;
+        }
+
+        #calculated-wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0; /* JS controla a altura! */
+            background: linear-gradient(0deg, #005aa7, #0077cc 80%);
+            opacity: 0.85;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 10px;
+            /* Animação suave da água subindo */
+            transition: height 1.2s cubic-bezier(0.23, 1, 0.32, 1); 
+        }
+
+        #wave-label-text {
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        /* 3. A Coluna dos Objetos */
+        .objects-lane {
+            flex-shrink: 0;
+            width: 100px;
+            height: 100%;
+            position: relative;
+            border-left: 2px dashed #aaa;
+        }
+
+        .comparison-object {
+            position: absolute;
+            bottom: 0;
+            width: 90%;
+            left: 5%;
+            background: rgba(150, 150, 150, 0.7);
+            border: 1px solid #555;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: #333;
+            padding: 2px 0;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        /* Alturas baseadas na escala de 35m */
+        /* 1.8m / 35m = 5.1% */
+        #obj-person { height: 5.1%; background: #f39c12; } 
+        /* 3.5m / 35m = 10% */
+        #obj-house  { height: 10%; background: #e74c3c; } 
+        /* 6m / 35m = 17.1% */
+        #obj-post   { height: 17.1%; background: #95a5a6; } 
+        /* 30m / 35m = 85.7% */
+        #obj-building { height: 85.7%; background: #34495e; color: white;} 
+
+        /* Aviso para ondas que quebram a escala */
+        #wave-warning {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #e74c3c;
+        }
+
+
+        /* Classe para esconder/mostrar o resultado */
+        .hidden {
+            display: none;
+        }
+
+        /* --- Responsividade para Celulares --- */
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+            .wave-container {
+                padding: 1.5rem;
+            }
+            .input-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
+            .comparison-scene {
+                height: 350px; /* Reduz altura em telas menores */
+            }
+            .scale-ruler {
+                width: 40px;
+                font-size: 10px;
+            }
+            .objects-lane {
+                width: 80px;
+            }
+            .comparison-object {
+                font-size: 9px;
+            }
+        }
+    </style>
+    </head>
+<body>
+
+    <div class="wave-container">
+        <h1>Calculadora de Onda</h1>
+        <p class="formula">F(x) = a · sen(b·x - t) + d</p>
+
+        <form id="wave-form">
+            <div class="input-grid">
+                <div class="input-group">
+                    <label for="a">a (Amplitude)</label>
+                    <input type="number" id="a" step="0.1" placeholder="Ex: 5" required>
+                </div>
+                <div class="input-group">
+                    <label for="b">b (Freq. Angular)</label>
+                    <input type="number" id="b" step="0.1" placeholder="Ex: 0.2" required>
+                </div>
+                <div class="input-group">
+                    <label for="t">t (Fase)</label>
+                    <input type="number" id="t" step="0.1" placeholder="Ex: 1.5" required>
+                </div>
+                <div class="input-group">
+                    <label for="d">d (Desloc. Vertical)</label>
+                    <input type="number" id="d" step="0.1" placeholder="Ex: 0" required>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="input-group-full">
+                <label for="x">x (Tempo ou Posição)</label>
+                <input type="number" id="x" step="0.1" placeholder="Insira o ponto que deseja calcular (Ex: 10)" required>
+            </div>
+
+            <button type="submit">Calcular Altura F(x)</button>
+        </form>
+
+        <div id="result-container" class="hidden">
+            <h2>Altura da Onda (Resultado)</h2>
+            <p id="result-text"></p>
+        </div>
+
+        <div id="visual-section" class="hidden">
+            <h2>Comparação Visual da Onda</h2>
+            
+            <div class="comparison-scene">
+                
+                <div class="scale-ruler">
+                    <span>30 m</span>
+                    <span>20 m</span>
+                    <span>10 m</span>
+                    <span>0 m</span>
+                </div>
+
+                <div class="wave-level-container">
+                    <div id="calculated-wave">
+                        <span id="wave-label-text"></span>
+                    </div>
+                </div>
+
+                <div class="objects-lane">
+                    <div class="comparison-object" id="obj-person" title="Pessoa (1.8m)">Pessoa</div>
+                    <div class="comparison-object" id="obj-house" title="Casa 1 Andar (3.5m)">Casa</div>
+                    <div class="comparison-object" id="obj-post" title="Poste (6m)">Poste</div>
+                    <div class="comparison-object" id="obj-building" title="Prédio 10 Andares (30m)">Prédio</div>
+                </div>
+
+            </div>
+            <p id="wave-warning" class="hidden"></p>
+        </div>
+
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Seletores do Formulário e Resultado
+            const waveForm = document.getElementById('wave-form');
+            const resultContainer = document.getElementById('result-container');
+            const resultText = document.getElementById('result-text');
+
+            // Seletores da Nova Visualização
+            const visualSection = document.getElementById('visual-section');
+            const comparisonScene = document.querySelector('.comparison-scene');
+            const calculatedWave = document.getElementById('calculated-wave');
+            const waveLabelText = document.getElementById('wave-label-text');
+            const waveWarning = document.getElementById('wave-warning');
+
+            // --- Configuração da Escala Visual ---
+            const MAX_SCALE_METERS = 35; // A altura máxima da nossa régua (em metros)
+            
+            // Função para calcular pixels por metro (será chamada na hora certa)
+            function getPixelsPerMeter() {
+                if (comparisonScene) {
+                    let currentSceneHeight = comparisonScene.offsetHeight;
+                    if (currentSceneHeight === 0) { 
+                        // Se estiver escondido, força o cálculo baseado no CSS
+                        // Isso é um fallback para o problema de "offsetHeight = 0"
+                        // Tenta ler do estilo CSS diretamente
+                        let styleHeight = window.getComputedStyle(comparisonScene).height;
+                        currentSceneHeight = parseFloat(styleHeight) || 400; // 400 é o padrão
+                    }
+                    return currentSceneHeight / MAX_SCALE_METERS;
+                }
+                return 400 / MAX_SCALE_METERS; // Fallback
+            }
+            
+            waveForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+
+                // 4. Mostrar a seção visual PRIMEIRO
+                // Isso corrige o bug de "offsetHeight" ser 0
+                visualSection.classList.remove('hidden');
+
+                const a = parseFloat(document.getElementById('a').value);
+                const b = parseFloat(document.getElementById('b').value);
+                const t = parseFloat(document.getElementById('t').value);
+                const d = parseFloat(document.getElementById('d').value);
+                const x = parseFloat(document.getElementById('x').value);
+
+                if (isNaN(a) || isNaN(b) || isNaN(t) || isNaN(d) || isNaN(x)) {
+                    alert("Por favor, preencha todos os campos com números válidos.");
+                    return;
+                }
+                
+                const interiorDoSen = (b * x) - t;
+                const fx = a * Math.sin(interiorDoSen) + d;
+                const resultadoFormatado = fx.toFixed(2);
+
+                // 1. Exibir o Resultado Numérico
+                resultText.innerHTML = `F(${x}) = <span>${resultadoFormatado} m</span>`;
+                resultContainer.classList.remove('hidden');
+
+                // 2. Controlar a Visualização
+                // Agora que a seção está visível, o cálculo funciona
+                let pixelsPerMeter = getPixelsPerMeter();
+                let waveHeightInPixels = fx * pixelsPerMeter;
+                let sceneHeight = comparisonScene.offsetHeight;
+
+                // Limpa avisos anteriores
+                waveWarning.classList.add('hidden');
+                waveLabelText.textContent = `${resultadoFormatado} m`;
+
+                if (waveHeightInPixels < 0) {
+                    waveHeightInPixels = 0;
+                    waveLabelText.textContent = `${resultadoFormatado} m (vale)`;
+                }
+
+                if (waveHeightInPixels > sceneHeight) {
+                    waveHeightInPixels = sceneHeight; // Trava no máximo
+                    waveWarning.textContent = `AVISO: A onda de ${resultadoFormatado}m ultrapassou a escala visual de ${MAX_SCALE_METERS}m!`;
+                    waveWarning.classList.remove('hidden');
+                }
+                
+                // 3. Aplicar a altura ao "nível da onda"
+                calculatedWave.style.height = waveHeightInPixels + 'px';
+            });
+        });
+    </script>
+    </body>
+</html>
