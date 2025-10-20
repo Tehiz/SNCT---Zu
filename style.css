@@ -7,7 +7,6 @@
 
 body {
     font-family: 'Montserrat', sans-serif;
-    /* Fundo gradiente com tema oceânico */
     background: linear-gradient(135deg, #005aa7, #0d324d);
     color: #333;
     display: flex;
@@ -23,7 +22,7 @@ body {
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     padding: 2.5rem;
-    max-width: 600px;
+    max-width: 700px; /* Aumentei um pouco para o gráfico */
     width: 100%;
     text-align: center;
 }
@@ -52,7 +51,6 @@ hr {
 /* --- Layout dos Inputs (Responsivo) --- */
 .input-grid {
     display: grid;
-    /* Cria 2 colunas em telas maiores */
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
 }
@@ -90,7 +88,7 @@ input[type="number"]:focus {
 button {
     width: 100%;
     padding: 1rem;
-    background: #0077cc; /* Azul vibrante */
+    background: #0077cc;
     color: white;
     border: none;
     border-radius: 8px;
@@ -102,7 +100,7 @@ button {
 }
 
 button:hover {
-    background: #005aa7; /* Tom mais escuro */
+    background: #005aa7;
 }
 
 /* --- Área de Resultado --- */
@@ -126,9 +124,29 @@ button:hover {
 }
 
 #result-text span {
-    color: #0077cc; /* Destaca o número */
+    color: #0077cc;
     font-size: 2rem;
 }
+
+/* --- Seção do Gráfico --- */
+#chart-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+#chart-section h2 {
+    color: #0d324d;
+    margin-bottom: 1.5rem;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    /* Altura para manter a proporção do gráfico */
+    height: 350px; 
+}
+
 
 /* Classe para esconder/mostrar o resultado */
 .hidden {
@@ -145,7 +163,6 @@ button:hover {
         padding: 1.5rem;
     }
 
-    /* Em telas pequenas, os inputs ficam em 1 coluna */
     .input-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
@@ -153,5 +170,9 @@ button:hover {
 
     h1 {
         font-size: 1.8rem;
+    }
+    
+    .chart-container {
+        height: 300px; /* Ajusta a altura em telas menores */
     }
 }
