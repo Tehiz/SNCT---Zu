@@ -71,10 +71,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Atualizar o texto de comparação (Perigo / Seguro)
         if (tsunamiHeight > buildingHeight) {
-            comparisonResultText.textContent = "PERIGO! O Tsunami é mais alto que o prédio!";
+            comparisonResultText.textContent = "O Tsunami é mais alto que o prédio!";
             comparisonResultText.style.color = "#d93025"; // Vermelho
         } else if (tsunamiHeight > 0) {
-            comparisonResultText.textContent = "SEGURO. O prédio é mais alto que a onda.";
+            comparisonResultText.textContent = "O prédio é mais alto que a onda.";
             comparisonResultText.style.color = "#1e8e3e"; // Verde
         } else {
             comparisonResultText.textContent = "Nenhum tsunami (F(x) ≤ 0).";
