@@ -1,4 +1,71 @@
-        </div> <footer id="project-credits">
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Altura de Onda</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="wave-container">
+        <h1>Calculadora de Onda (Tsunami)</h1>
+        <p class="formula">Altura do Tsunami F(x) = a · sen(b·x - t) + d</p>
+
+        <form id="wave-form">
+            <div class="input-grid">
+                <div class="input-group">
+                    <label for="a">a (Amplitude)</label>
+                    <input type="number" id="a" step="0.1" placeholder="Ex: 5" required>
+                </div>
+                <div class="input-group">
+                    <label for="b">b (Freq. Angular)</label>
+                    <input type="number" id="b" step="0.1" placeholder="Ex: 0.2" required>
+                </div>
+                <div class="input-group">
+                    <label for="t">t (Fase)</label>
+                    <input type="number" id="t" step="0.1" placeholder="Ex: 1.5" required>
+                </div>
+                <div class="input-group">
+                    <label for="d">d (Nível do Mar)</label>
+                    <input type="number" id="d" step="0.1" placeholder="Ex: 0" required>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="input-grid">
+                <div class="input-group-full">
+                    <label for="building-height">Altura do Prédio (para comparar)</label>
+                    <input type="number" id="building-height" step="1" placeholder="Ex: 20" required>
+                </div>
+                <div class="input-group-full">
+                    <label for="x">x (Distância/Tempo)</label>
+                    <input type="number" id="x" step="0.1" placeholder="Insira o ponto que deseja calcular (Ex: 10)" required>
+                </div>
+            </div>
+
+            <button type="submit">Calcular Altura F(x)</button>
+        </form>
+
+        <div id="result-container" class="hidden">
+            
+            <div id="simulation-scene">
+                <div id="tsunami-wave">
+                    <span id="wave-label">Tsunami: 0m</span>
+                </div>
+                <div id="building">
+                    <span id="building-label">Prédio: 0m</span>
+                </div>
+            </div>
+
+            <h2 id="comparison-result-text"></h2>
+            
+            <p id="result-text-title">Valor Exato Calculado:</p>
+            <p id="result-text"></p>
+        </div>
+    </div> <footer id="project-credits">
         <div class="credits-content">
             <h2 class="snct-title">SNCT 2025 - 15ª EDIÇÃO</h2>
             <h3 class="project-subtitle">1TII - MATEMÁTICA NAS ONDAS DO OCEANO: MODELANDO TSUNAMIS</h3>
